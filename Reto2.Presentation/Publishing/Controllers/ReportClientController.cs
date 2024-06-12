@@ -28,11 +28,11 @@ namespace Reto2.Presentation.Publishing.Controllers
             _clienteDomain = clienteDomain;
         }
         
-        // GET: api/ReportClient
+        // GET: api/reportClient/clients
         [HttpGet]
         public async Task<IActionResult> GetAsync()
         {
-            var data = await _clienteData.GetAllAsync();
+            var data = await _clienteData.GetAllClientesAsync();
             var result = _mapper.Map<List<Cliente>, List<ClienteResponse>>(data);
             if (result.Count == 0) return NotFound();
             
@@ -53,7 +53,7 @@ namespace Reto2.Presentation.Publishing.Controllers
             }
             
             var cliente = _mapper.Map<ClienteRequest, Cliente>(input);
-            var result = await _clienteDomain.SaveAsync(cliente);
+            var result = await _clienteDomain.SaveClienteAsync(cliente);
 
             if (result > 0)
                 return StatusCode(StatusCodes.Status201Created, result);
@@ -84,10 +84,7 @@ namespace Reto2.Presentation.Publishing.Controllers
             
             return StatusCode(StatusCodes.Status404NotFound);
         }
-
         
-        
-
         // PUT: api/ReportClient/Pedido
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] PedidoRequest input)

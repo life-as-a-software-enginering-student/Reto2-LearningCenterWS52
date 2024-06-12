@@ -4,19 +4,15 @@ namespace Reto2.Infrastructure.Repositories;
 
 public interface IClienteData
 {
-    Task<List<Cliente>> GetAllAsync();
+    Task<List<Cliente>> GetAllClientesAsync();
+    Task<List<Pedido>> GetAllPedidosAsync();
     Task<List<Cliente>> GetSearchAsync(string name);
-    
     Cliente GetById(int id);
-    
-    Task<Cliente> CreateAsync(Cliente cliente);
-    Task<Pedido> CreateAsync(Pedido pedido);
-    
-    Task<int> CountByClienteIdAndDateAsync(int clienteId, DateTime date);
+    Task<Cliente> GetByNameAsync(string name);
+    Task<Cliente> GetByEmailAsync(string email);
 
-    Task<bool> ExistsByEmailAsync(string email);
-    
-    Task<Pedido> UpdateAsync(Pedido pedido);
-    Task<Pedido> GetByIdAsync(int id);
-    Task<int> SaveAsync(Cliente cliente);
+    Task<int> SaveClienteAsync(Cliente cliente);    
+    Task<int> SavePedidoAsync(Pedido pedido);
+    bool Update(Pedido pedido, int id);
+    bool Delete(int id);
 }

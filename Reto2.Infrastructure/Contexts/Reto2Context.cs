@@ -16,7 +16,7 @@ public class Reto2Context: DbContext
     }
     
     public DbSet<Cliente> Clientes { get; set; }
-    public DbSet<Pedido> Pedidos { get; set; }
+    public DbSet<Pedido>  Pedidos { get; set; }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

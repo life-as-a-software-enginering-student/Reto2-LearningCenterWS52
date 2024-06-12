@@ -1,4 +1,5 @@
-﻿using Reto2.Infrastructure.Entities;
+﻿using System.Data;
+using Reto2.Infrastructure.Entities;
 using Reto2.Infrastructure.Repositories;
 
 namespace Reto2.Domain;
@@ -10,42 +11,39 @@ public class ClienteDomain : IClienteDomain
     public ClienteDomain(IClienteData clienteData)
     {
         _clienteData = clienteData;
+        
+    }
+
+    public async Task<int> SaveClienteAsync(Cliente cliente)
+    {
+        var existingCliente = await _clienteData.GetByEmailAsync(cliente.Correo); 
+        if (existingCliente != null) 
+        { 
+            throw new Exception("Cliente with this email already exists"); 
+        }
+        var result = await _clienteData.SaveClienteAsync(cliente); 
+        return result; 
     }
     
-    public async Task<Cliente> CreateClienteAsync(Cliente cliente)
+    public async Task<int> SaveAsync(Cliente cliente, Pedido pedido)
     {
-        if (await _clienteData.ExistsByEmailAsync(cliente.Correo))
-        {
-            throw new Exception("El email ya existe");
-        }
+        var existingPedido = await _clienteData.GetByNameAsync(cliente.Nombre);
+        if (existingPedido == null) throw new DuplicateNameException("Cliente Not Found");
         
-        return await _clienteData.CreateAsync(cliente);
-    }
-
-    public async Task<Pedido> CreatePedidoAsync(Pedido pedido)
-    {
-        var count = await _clienteData.CountByClienteIdAndDateAsync(pedido.ClienteId, pedido.Fecha);
-        if (count >= 5)
-        {
-            throw new Exception("Un cliente no puede tener más de 5 pedidos al día");
-        }
-
-        return await _clienteData.CreateAsync(pedido);
-    }
-
-    public async Task<Pedido> UpdatePedidoAsync(Pedido pedido)
-    {
-        var existingPedido = await _clienteData.GetByIdAsync(pedido.Id);
-        if (existingPedido.ClienteId != pedido.ClienteId)
-        {
-            throw new Exception("No se puede cambiar el cliente de un pedido");
-        }
+        var total = (await _clienteData.GetAllPedidosAsync()).Count;
+        if (total > 5) throw new ConstraintException("Max pedidos reached " + 5); 
         
-        return await _clienteData.UpdateAsync(pedido);
+        return await _clienteData.SavePedidoAsync(pedido);
     }
     
-    public async Task<int> SaveAsync(Cliente cliente)
+    public bool UpdatePedidoAsync(Pedido pedido)
     {
-        return await _clienteData.SaveAsync(cliente);
+        var existingPedido = _clienteData.GetById(pedido.Id);
+        if (existingPedido == null) throw new DuplicateNameException("Pedido Not Found");
+        if (existingPedido.Id != pedido.ClienteId)
+        {
+            throw new ConstraintException("The clientId can not be change");
+        }
+        return _clienteData.Update(pedido, pedido.Id);
     }
 }
